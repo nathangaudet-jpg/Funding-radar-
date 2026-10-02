@@ -19,13 +19,13 @@ VERB_RE = re.compile(r"\b" + FUND_VERBS + r"\b", re.I)
 FUNDING_HINT = re.compile(r"\b(funding|round|series [a-h]|seed|investment|raises|raised|secures|valuation)\b", re.I)
 ACQ_RE = re.compile(r"\b(acquires|acquired|to acquire|acquisition of|buys|invests in|takes stake|leads investment)\b", re.I)
 AMOUNT_RE = re.compile(
-    r"(?P<cur>US\$|\$|€|£|USD\s?|EUR\s?|GBP\s?)?\s?(?P<num>\d{1,4}(?:[.,]\d{1,3})?)\s?"
-    r"(?P<unit>billion|bn|million|mln|mn|m|b)\b\.?\s?(?P<cur2>dollars?|USD|euros?|EUR|pounds?|GBP)?", re.I)
+    r"(?P<cur>US\$|C\$|CA\$|\$|€|£|USD\s?|EUR\s?|GBP\s?|JPY\s?|CNY\s?|RMB\s?)?\s?(?P<num>\d{1,4}(?:[.,]\d{1,3})?)\s?"
+    r"(?P<unit>billion|bn|million|mln|mn|m|b)\b\.?\s?(?P<cur2>dollars?|USD|euros?|EUR|pounds?|GBP|yen|JPY|yuan|CNY|RMB)?", re.I)
 STAGE_RE = re.compile(r"\b(pre-seed|seed|series [a-h]\+?|growth round|growth|debt|IPO)\b", re.I)
 WIRES = ("businesswire", "prnewswire", "globenewswire", "newswire", "presseportal", "accesswire")
 
 PLACES = [  # (pattern, country, region)
-    (r"\b(UK|U\.K\.|British|London|Manchester|Edinburgh|Cambridge, UK)\b", "UK", "Europe"),
+    (r"\b(UK|U\.K\.|British|London|Manchester|Edinburgh)\b", "UK", "Europe"),
     (r"\b(German|Germany|Berlin|Munich|Hamburg|Cologne|Frankfurt)\b", "Germany", "Europe"),
     (r"\b(French|France|Paris|Lyon)\b", "France", "Europe"),
     (r"\b(Dutch|Netherlands|Amsterdam|Rotterdam)\b", "Netherlands", "Europe"),
@@ -34,17 +34,23 @@ PLACES = [  # (pattern, country, region)
     (r"\b(Finnish|Finland|Helsinki)\b", "Finland", "Europe"),
     (r"\b(Norwegian|Norway|Oslo)\b", "Norway", "Europe"),
     (r"\b(Spanish|Spain|Madrid|Barcelona)\b", "Spain", "Europe"),
-    (r"\b(Italian|Italy|Milan|Rome)\b", "Italy", "Europe"),
+    (r"\b(Italian|Italy|Milan)\b", "Italy", "Europe"),
     (r"\b(Swiss|Switzerland|Zurich|Geneva|Lausanne)\b", "Switzerland", "Europe"),
     (r"\b(Irish|Ireland|Dublin)\b", "Ireland", "Europe"),
     (r"\b(Polish|Poland|Warsaw|Krakow)\b", "Poland", "Europe"),
     (r"\b(Estonian|Estonia|Tallinn)\b", "Estonia", "Europe"),
+    (r"\b(Lithuanian|Lithuania|Vilnius|Latvian|Latvia|Riga)\b", "Baltics", "Europe"),
     (r"\b(Portuguese|Portugal|Lisbon|Porto)\b", "Portugal", "Europe"),
     (r"\b(Belgian|Belgium|Brussels|Antwerp)\b", "Belgium", "Europe"),
     (r"\b(Austrian|Austria|Vienna)\b", "Austria", "Europe"),
+    (r"\b(Czech|Prague|Romanian|Romania|Bucharest|Greek|Greece|Athens|Hungarian|Budapest|Luxembourg)\b", "", "Europe"),
     (r"\b(European|Europe's|Europe-based)\b", "", "Europe"),
-    (r"\b(Chinese|China|Beijing|Shanghai|Shenzhen|Hangzhou)\b", "China", "China"),
-    (r"\b(US|U\.S\.|US-based|American|San Francisco|New York|NYC|Silicon Valley|Boston|Seattle|Austin|Palo Alto|Los Angeles)\b", "US", "US"),
+    (r"\b(US|U\.S\.|US-based|American|San Francisco|New York|NYC|Silicon Valley|Boston|Seattle|Austin|Palo Alto|Los Angeles|Miami|Chicago)\b", "US", "North America"),
+    (r"\b(Canadian|Canada|Toronto|Montreal|Vancouver|Ottawa)\b", "Canada", "North America"),
+    (r"\b(Japanese|Japan|Tokyo|Osaka|Kyoto)\b", "Japan", "Asia"),
+    (r"\b(Chinese|China|Beijing|Shanghai|Shenzhen|Hangzhou|Hong Kong)\b", "China", "Asia"),
+    # outside the scouting areas: rounds from these places are dropped
+    (r"\b(Indian|India|Bengaluru|Bangalore|Mumbai|Delhi|Israeli|Israel|Tel Aviv|Singapore|Singaporean|Korean|Korea|Seoul|Taiwan|Taiwanese|Indonesian|Indonesia|Jakarta|Vietnam|Vietnamese|Australian|Australia|Sydney|Melbourne|New Zealand|Brazilian|Brazil|Sao Paulo|Mexican|Mexico|Argentina|Chile|Colombia|UAE|Dubai|Abu Dhabi|Saudi|Riyadh|Egypt|Nigeria|Nigerian|Kenya|Kenyan|South Africa|Turkish|Turkey|Istanbul|Pakistan)\b", "", "Other"),
 ]
 
 
@@ -96,6 +102,10 @@ def parse_amount(text):
             musd *= CONFIG["eur_to_usd"]
         elif cur in ("£", "gbp") or cur.startswith("pound"):
             musd *= CONFIG["gbp_to_usd"]
+        elif cur in ("yen", "jpy"):
+            musd *= CONFIG["jpy_to_usd"]
+        elif cur in ("yuan", "cny", "rmb"):
+            musd *= CONFIG["cny_to_usd"]
         return round(musd, 1), m.group(0).strip()
     return None, None
 
@@ -108,6 +118,8 @@ def parse_company(title):
     words = before.replace("’", "'").split()
     name = []
     for w in reversed(words):
+        if w.lower().endswith(("-based", "-headquartered")):
+            break
         if w[:1].isupper() or w[:1].isdigit():
             name.insert(0, w)
         else:
@@ -118,11 +130,30 @@ def parse_company(title):
     return (company or None), descriptor
 
 
-def detect_place(text):
-    for pat, country, region in PLACES:
-        if re.search(pat, text):
-            return country, region
+def detect_place(*texts):
+    """Country and region of the earliest place mentioned (title first, then summary)."""
+    for text in texts:
+        best = None
+        for pat, country, region in PLACES:
+            m = re.search(pat, text)
+            if m and (best is None or m.start() < best[0]):
+                best = (m.start(), country, region)
+        if best:
+            return best[1], best[2]
     return "", ""
+
+
+def area_threshold(country, region):
+    """Threshold in $M if the place is inside a scouting area, else None (drop)."""
+    if region == "Unknown":
+        u = CONFIG["unknown_region"]
+        return u["threshold_musd"] if u.get("keep", True) else None
+    for a in CONFIG["scouting_areas"]:
+        if a["region"] != region:
+            continue
+        if a["countries"] == "all" or country in a["countries"]:
+            return a["threshold_musd"]
+    return None
 
 
 def match_fields(text):
@@ -166,13 +197,16 @@ def classify(item, field_hint):
         company = actor
     if not company:
         return None
-    country, region = detect_place(text)
-    if not region and label and ("€" in label or "eur" in label.lower() or "£" in label or "gbp" in label.lower()):
+    country, region = detect_place(item["title"], item["summary"])
+    low = (label or "").lower()
+    if not region and label and ("€" in label or "eur" in low or "£" in label or "gbp" in low):
         region = "Europe"
     region = region or "Unknown"
-    if kind == "startup":
-        if musd < CONFIG["thresholds_musd"].get(region, 10):
-            return None
+    limit = area_threshold(country, region)
+    if limit is None:
+        return None  # outside the scouting areas
+    if kind == "startup" and musd < limit:
+        return None
     stage = STAGE_RE.search(text)
     return {
         "company": company, "kind": kind, "field": fields[0],
