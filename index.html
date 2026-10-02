@@ -3,63 +3,95 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Funding radar</title>
+<title>Funding radar | Space and Lemon Innovations</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--paper:#F1F3F7;--surface:#FFFFFF;--ink:#14213D;--muted:#5B6B82;--line:#D7DDE6;--blue:#2347E8;--blue-soft:#E4E9FD;--green:#0D7A55;--amber:#A15C00;
-  --font:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-sizing:border-box}
-@media (prefers-color-scheme:dark){:root{--paper:#0E1522;--surface:#151F31;--ink:#E7ECF4;--muted:#93A1B8;--line:#26324A;--blue:#7D97FF;--blue-soft:#1C2A52;--green:#4CC79A;--amber:#F0B45C}}
+:root{
+  /* Space and Lemon palette */
+  --white:#FFFFFF;--black:#000000;--grey:#F4F4F4;
+  --yellow:#FFC835;--orange:#FA3D43;--magenta:#D82170;--purple:#6F26CA;--blue:#5496E0;
+  --blueline:#2330FF; /* the SLI slide "blue line" */
+  --paper:var(--white);--surface:var(--grey);--ink:var(--black);--muted:#5F5F5F;--line:#E3E3E3;
+  --spectrum:linear-gradient(180deg,var(--blue) 0%,var(--purple) 30%,var(--magenta) 55%,var(--orange) 78%,var(--yellow) 100%);
+  --font:"Montserrat",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root{--paper:#000000;--surface:#161616;--ink:#FFFFFF;--muted:#A8A8A8;--line:#2A2A2A;--blueline:#8C93FF}}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
 button,select,input{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px}
-.brand{font-weight:700;color:var(--muted);margin:0 0 6px}
-h1{font-size:clamp(30px,5vw,48px);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin:0}
-.sub{color:var(--muted);margin:8px 0 0}
-.nav{display:flex;gap:8px}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer}
-.btn:hover{border-color:var(--muted)} .btn[disabled]{opacity:.45;cursor:default}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+:focus-visible{outline:2px solid var(--blueline);outline-offset:2px}
+
+/* Hero: black like the SLI divider slides, with the gradient pills from the cover */
+.hero{background:#000;color:#fff;position:relative;overflow:hidden}
+.hero-in{max-width:1120px;margin:0 auto;padding:32px 20px 40px;position:relative;z-index:1}
+.wordmark{font-weight:700;font-size:13px;line-height:1.25;letter-spacing:.02em;margin:0 0 56px;text-transform:uppercase}
+.kicker{font-weight:500;color:#BDBDBD;margin:0 0 8px}
+h1{font-size:clamp(28px,4.6vw,46px);font-weight:600;letter-spacing:-.01em;line-height:1.1;margin:0;max-width:16ch}
+.sub{color:#BDBDBD;margin:12px 0 0;max-width:60ch;font-size:14px}
+.nav{display:flex;gap:8px;margin-top:24px}
+.hero .btn{background:transparent;border-color:#444;color:#fff}
+.hero .btn:hover{border-color:#fff}
+.pills{position:absolute;right:max(20px,calc((100vw - 1120px)/2 + 20px));top:28px;bottom:-30px;display:flex;gap:14px;align-items:flex-start;pointer-events:none}
+.pills span{display:block;width:46px;border-radius:999px;background:var(--spectrum)}
+.pills span:nth-child(1){height:150px;margin-top:70px}
+.pills span:nth-child(2){height:230px}
+.pills span:nth-child(3){height:120px;margin-top:110px}
+.pills span:nth-child(4){height:46px;margin-top:40px;background:linear-gradient(135deg,var(--yellow),var(--orange))}
+.pills span:nth-child(5){height:190px;margin-top:20px}
+
+.wrap{max-width:1120px;margin:0 auto;padding:24px 20px 72px}
+.btn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 16px;cursor:pointer;font-weight:500;font-size:14px}
+.btn:hover{border-color:var(--ink)} .btn[disabled]{opacity:.4;cursor:default}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
 .tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px 9px;cursor:pointer;font-weight:600;color:var(--muted)}
-.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:14px}
+.tab[aria-selected="true"]{color:var(--ink);border-image:linear-gradient(90deg,var(--yellow),var(--orange),var(--magenta),var(--purple),var(--blue)) 1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{border:0;background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:500}
 .chip .n{color:var(--muted);margin-left:6px}
-.chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
-.chip[aria-pressed="true"] .n{color:rgba(255,255,255,.8)}
-.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px}
 .filters label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
-.filters select,.filters input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px}
-.filters input{min-width:200px} .spacer{flex:1}
+.filters select,.filters input{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:6px 8px;font-size:14px}
+.filters input{min-width:220px} .spacer{flex:1}
+
+/* Rows follow the SLI company slide: name, headline, blue line */
 .list{border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:1fr auto;gap:4px 24px;padding:18px 0;border-bottom:1px solid var(--line)}
-.row h3{margin:0;font-size:19px;font-weight:700;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 28px;padding:20px 0;border-bottom:1px solid var(--line)}
+.row h3{margin:0;font-size:20px;font-weight:600;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
 .meta{font-size:13px;color:var(--muted);font-weight:500}
-.what{color:var(--blue);font-weight:600;margin:2px 0 0;max-width:68ch}
-.amount{grid-column:2;grid-row:1/span 2;text-align:right;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.amount small{display:block;font-size:13px;font-weight:500;color:var(--muted)}
-.foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:13px;color:var(--muted);margin-top:6px}
+.what{color:var(--blueline);font-weight:500;margin:4px 0 0;max-width:70ch}
+.amount{grid-column:2;grid-row:1/span 2;text-align:right;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.amount small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
 .foot a{color:var(--ink);text-underline-offset:3px}
-.ok{color:var(--green);font-weight:600} .warn{color:var(--amber);font-weight:600}
-.kind{font-size:12px;font-weight:700;border-radius:4px;padding:1px 6px;background:var(--blue-soft);color:var(--blue)}
-.status{margin-left:auto} .status select{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 6px;font-size:13px}
-.row[data-status="dismissed"]{opacity:.5}
-.empty{padding:40px 0;max-width:60ch} .empty h2{font-size:20px;margin:0 0 8px} .empty p{color:var(--muted);margin:0}
+.ok{color:var(--purple);font-weight:600} .warn{color:var(--orange);font-weight:600}
+@media (prefers-color-scheme:dark){.ok{color:#B58CFF}}
+.kind{font-size:11px;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--purple);color:#fff}
+.status{margin-left:auto} .status select{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:3px 6px;font-size:13px}
+.row[data-status="dismissed"]{opacity:.45}
+.empty{padding:40px 0;max-width:60ch} .empty h2{font-size:20px;font-weight:600;margin:0 0 8px} .empty p{color:var(--muted);margin:0}
+.dot{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));margin:48px 0 0 auto}
+@media (max-width:760px){.pills{opacity:.35;right:-20px}.wordmark{margin-bottom:36px}}
 @media (max-width:640px){.row{grid-template-columns:1fr}.amount{grid-column:1;grid-row:auto;text-align:left;font-size:20px}.amount small{display:inline;margin-left:8px}.filters input{width:100%;min-width:0}.status{margin-left:0}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div><p class="brand">Funding radar</p><h1 id="title">Loading…</h1><p class="sub" id="sub"></p></div>
+<header class="hero">
+  <div class="pills" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="hero-in">
+    <p class="wordmark">Space and Lemon<br>Innovations</p>
+    <p class="kicker">Funding radar</p>
+    <h1 id="title">Loading…</h1>
+    <p class="sub" id="sub"></p>
     <div class="nav" id="nav">
       <button class="btn" id="prev">‹ Previous</button><button class="btn" id="today">This week</button><button class="btn" id="next">Next ›</button>
     </div>
-  </header>
+  </div>
+</header>
+<div class="wrap">
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-week" aria-selected="true">Weekly rounds</button>
     <button class="tab" role="tab" id="tab-all" aria-selected="false">Full database</button>
@@ -73,6 +105,7 @@ h1{font-size:clamp(30px,5vw,48px);font-weight:800;letter-spacing:-.02em;line-hei
     <span class="spacer"></span><button class="btn" id="export">Export CSV</button>
   </div>
   <div class="list" id="list"></div>
+  <div class="dot" aria-hidden="true"></div>
 </div>
 <script>
 (function(){
