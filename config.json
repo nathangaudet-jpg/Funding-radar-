@@ -1,36 +1,227 @@
 {
-  "thresholds_musd": { "US": 100, "China": 100, "Europe": 10, "Unknown": 10 },
+  "thresholds_musd": {
+    "US": 100,
+    "China": 100,
+    "Europe": 10,
+    "Unknown": 10
+  },
   "window_days": 7,
-  "eur_to_usd": 1.10,
-  "gbp_to_usd": 1.30,
+  "eur_to_usd": 1.1,
+  "gbp_to_usd": 1.3,
   "fields": [
     {
-      "name": "AI customer service",
-      "keywords": ["customer service", "customer support", "customer experience", "contact center", "call center", "support agent", "CX"]
+      "name": "Customer service",
+      "keywords": [
+        "customer service",
+        "customer support",
+        "contact center",
+        "call center",
+        "customer experience",
+        "support automation"
+      ]
     },
     {
-      "name": "Virtual panels",
-      "keywords": ["synthetic audience", "synthetic respondents", "virtual panel", "consumer research", "market research", "AI interviews", "digital twins of consumers"]
+      "name": "Banking & payments",
+      "keywords": [
+        "payments",
+        "neobank",
+        "digital bank",
+        "banking",
+        "stablecoin",
+        "digital euro",
+        "fintech",
+        "wallet",
+        "checkout"
+      ]
     },
     {
-      "name": "Retail AI",
-      "keywords": ["retail", "shopping assistant", "ecommerce", "e-commerce", "retailer", "store operations", "commerce AI"]
+      "name": "Synthetic audiences",
+      "keywords": [
+        "synthetic audience",
+        "synthetic respondents",
+        "virtual panel",
+        "AI market research",
+        "consumer research",
+        "simulated consumers",
+        "AI-moderated interviews"
+      ]
+    },
+    {
+      "name": "Retail",
+      "keywords": [
+        "retail",
+        "retailer",
+        "ecommerce",
+        "e-commerce",
+        "shopping assistant",
+        "commerce",
+        "grocery"
+      ]
+    },
+    {
+      "name": "Mobility",
+      "keywords": [
+        "mobility",
+        "autonomous vehicle",
+        "robotaxi",
+        "self-driving",
+        "electric vehicle",
+        "EV charging",
+        "micromobility"
+      ]
+    },
+    {
+      "name": "LLMs",
+      "keywords": [
+        "large language model",
+        "LLM",
+        "foundation model",
+        "AI lab",
+        "frontier model",
+        "open-source model"
+      ]
     },
     {
       "name": "Physical AI & supply chain",
-      "keywords": ["warehouse", "robotics", "robot", "autonomous truck", "logistics", "supply chain", "physical AI", "humanoid"]
+      "keywords": [
+        "warehouse",
+        "robotics",
+        "supply chain",
+        "logistics",
+        "humanoid",
+        "physical AI",
+        "autonomous truck"
+      ]
     },
     {
-      "name": "Payments & digital euro",
-      "keywords": ["payments", "digital euro", "stablecoin", "CBDC", "wallet", "fintech", "checkout"]
+      "name": "AI agents",
+      "keywords": [
+        "AI agent",
+        "AI agents",
+        "agentic",
+        "autonomous agents",
+        "agent platform",
+        "AI workforce"
+      ]
     },
     {
-      "name": "Sleep & wearables",
-      "keywords": ["sleep", "wearable", "smart ring", "health tracker", "sleep tech", "biometric"]
+      "name": "Development",
+      "keywords": [
+        "developer tools",
+        "coding assistant",
+        "AI coding",
+        "software development",
+        "devtools",
+        "code generation"
+      ]
+    },
+    {
+      "name": "Digital marketing",
+      "keywords": [
+        "marketing",
+        "adtech",
+        "advertising",
+        "martech",
+        "retail media",
+        "influencer marketing",
+        "SEO"
+      ]
+    },
+    {
+      "name": "Legal tech",
+      "keywords": [
+        "legal tech",
+        "legaltech",
+        "legal AI",
+        "law firm",
+        "contract management",
+        "e-discovery"
+      ]
+    },
+    {
+      "name": "New workspaces",
+      "keywords": [
+        "workspace",
+        "productivity software",
+        "work OS",
+        "enterprise search",
+        "knowledge management",
+        "collaboration software",
+        "operating system"
+      ]
     }
   ],
-  "big_actors": ["Amazon", "Walmart", "Google", "Alphabet", "Microsoft", "Apple", "Meta", "Salesforce", "Zendesk", "Oracle", "SAP", "Shopify", "Visa", "Mastercard", "PayPal", "Stripe", "Adyen", "Kantar", "Ipsos", "Nielsen", "Qualtrics", "NielsenIQ", "Lidl", "Schwarz", "Carrefour", "Ahold", "Tesco", "Target", "Nvidia", "OpenAI", "Anthropic", "Samsung", "Oura", "Garmin", "ECB", "Klarna", "Alibaba", "JD.com", "Tencent"],
+  "big_actors": [
+    "Amazon",
+    "Walmart",
+    "Google",
+    "Alphabet",
+    "Microsoft",
+    "Apple",
+    "Meta",
+    "Salesforce",
+    "Zendesk",
+    "Oracle",
+    "SAP",
+    "Shopify",
+    "Visa",
+    "Mastercard",
+    "PayPal",
+    "Stripe",
+    "Adyen",
+    "Kantar",
+    "Ipsos",
+    "Nielsen",
+    "Qualtrics",
+    "NielsenIQ",
+    "Lidl",
+    "Schwarz",
+    "Carrefour",
+    "Ahold",
+    "Tesco",
+    "Target",
+    "Nvidia",
+    "OpenAI",
+    "Anthropic",
+    "Samsung",
+    "Oura",
+    "Garmin",
+    "ECB",
+    "Klarna",
+    "Alibaba",
+    "JD.com",
+    "Tencent",
+    "Tesla",
+    "Uber",
+    "Waymo",
+    "BMW",
+    "Volkswagen",
+    "Mercedes-Benz",
+    "Mistral",
+    "Cohere",
+    "xAI",
+    "Atlassian",
+    "Notion",
+    "Slack",
+    "Adobe",
+    "HubSpot",
+    "WPP",
+    "Publicis",
+    "Thomson Reuters",
+    "LexisNexis",
+    "WeWork",
+    "IWG",
+    "GitHub",
+    "JPMorgan",
+    "BNP Paribas",
+    "Deutsche Bank",
+    "Revolut",
+    "IBM"
+  ],
   "extra_feeds": [
-    { "name": "TechCrunch fundraising", "url": "https://techcrunch.com/category/fundraising/feed/" }
+    {
+      "name": "TechCrunch fundraising",
+      "url": "https://techcrunch.com/category/fundraising/feed/"
+    }
   ]
 }
