@@ -30,6 +30,8 @@ button,select,input{font:inherit;color:inherit}
 .kicker{font-weight:500;color:#BDBDBD;margin:0 0 8px}
 h1{font-size:clamp(28px,4.6vw,46px);font-weight:600;letter-spacing:-.01em;line-height:1.1;margin:0;max-width:16ch}
 .sub{color:#BDBDBD;margin:12px 0 0;max-width:60ch;font-size:14px}
+.areas{margin:14px 0 0;font-size:13px;font-weight:500;color:#fff;display:flex;flex-wrap:wrap;gap:6px}
+.areas span{border:1px solid #444;border-radius:999px;padding:3px 12px}
 .nav{display:flex;gap:8px;margin-top:24px}
 .hero .btn{background:transparent;border-color:#444;color:#fff}
 .hero .btn:hover{border-color:#fff}
@@ -86,6 +88,7 @@ h1{font-size:clamp(28px,4.6vw,46px);font-weight:600;letter-spacing:-.01em;line-h
     <p class="kicker">Funding radar</p>
     <h1 id="title">Loading…</h1>
     <p class="sub" id="sub"></p>
+    <p class="areas" id="areas"></p>
     <div class="nav" id="nav">
       <button class="btn" id="prev">‹ Previous</button><button class="btn" id="today">This week</button><button class="btn" id="next">Next ›</button>
     </div>
@@ -98,7 +101,7 @@ h1{font-size:clamp(28px,4.6vw,46px);font-weight:600;letter-spacing:-.01em;line-h
   </div>
   <div class="chips" id="chips"></div>
   <div class="filters">
-    <label>Region <select id="f-region"><option value="all">All</option><option>Europe</option><option>US</option><option>China</option><option>Unknown</option></select></label>
+    <label>Region <select id="f-region"><option value="all">All</option><option>Europe</option><option>North America</option><option>Asia</option><option>Unknown</option></select></label>
     <label>Type <select id="f-kind"><option value="all">All</option><option value="startup">Startups</option><option value="big">Big actors</option></select></label>
     <label>Status <select id="f-status"><option value="all">All</option><option value="new">New</option><option value="shortlisted">Shortlisted</option><option value="in_deck">In a deck</option><option value="dismissed">Not relevant</option></select></label>
     <input id="f-q" type="search" placeholder="Search companies, headlines…" aria-label="Search">
@@ -157,6 +160,11 @@ function rowEl(r){
       r.amount_label?h("span",null,"Reported as ",r.amount_label):null,
       h("span",{class:"status"},sel)));
 }
+function renderAreas(cfg){
+  const names={"North America":"US & Canada","Asia":"Japan & China"};
+  const chips=(cfg.scouting_areas||[]).map(a=>h("span",null,(a.countries==="all"?a.region:a.countries.join(" & "))+", $"+a.threshold_musd+"M+"));
+  $("areas").replaceChildren(...chips);
+}
 function cell(v){const s=v==null?"":String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
 $("export").onclick=()=>{const cols=["company","kind","field","headline","amount","stage","date","country","region","status","source_name","source_url","first_party"];
   const csv=[cols.join(",")].concat(rows().map(r=>cols.map(c=>cell(c==="amount"?money(r):c==="status"?STATUS[status(r)]:c==="kind"?(r.kind==="big"?"Big actor":"Startup"):r[c])).join(","))).join("\n");
@@ -171,7 +179,8 @@ Promise.allSettled([get("data/rounds.json"),get("data/sweeps.json"),get("config.
   S.ready=true;
   if(a.status==="fulfilled")S.rounds=a.value;else S.error="The first sweep hasn't run yet. Open the Actions tab on GitHub and run \"Monday funding sweep\".";
   if(b.status==="fulfilled")S.sweeps=b.value;
-  if(c.status==="fulfilled")S.fields=(c.value.fields||[]).map(f=>f.name);
+  if(c.status==="fulfilled"){S.fields=(c.value.fields||[]).map(f=>f.name);renderAreas(c.value)}
+  const OLD={US:"North America",China:"Asia"};S.rounds.forEach(r=>{if(OLD[r.region])r.region=OLD[r.region]});
   render();
 });
 })();
