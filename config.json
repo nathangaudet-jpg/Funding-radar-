@@ -1,9 +1,30 @@
 {
-  "thresholds_musd": {
-    "US": 100,
-    "China": 100,
-    "Europe": 10,
-    "Unknown": 10
+  "scouting_areas": [
+    {
+      "region": "Europe",
+      "countries": "all",
+      "threshold_musd": 10
+    },
+    {
+      "region": "North America",
+      "countries": [
+        "US",
+        "Canada"
+      ],
+      "threshold_musd": 100
+    },
+    {
+      "region": "Asia",
+      "countries": [
+        "Japan",
+        "China"
+      ],
+      "threshold_musd": 100
+    }
+  ],
+  "unknown_region": {
+    "keep": true,
+    "threshold_musd": 10
   },
   "window_days": 7,
   "eur_to_usd": 1.1,
@@ -223,5 +244,7 @@
       "name": "TechCrunch fundraising",
       "url": "https://techcrunch.com/category/fundraising/feed/"
     }
-  ]
+  ],
+  "jpy_to_usd": 0.0067,
+  "cny_to_usd": 0.14
 }
