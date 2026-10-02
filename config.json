@@ -1,0 +1,36 @@
+{
+  "thresholds_musd": { "US": 100, "China": 100, "Europe": 10, "Unknown": 10 },
+  "window_days": 7,
+  "eur_to_usd": 1.10,
+  "gbp_to_usd": 1.30,
+  "fields": [
+    {
+      "name": "AI customer service",
+      "keywords": ["customer service", "customer support", "customer experience", "contact center", "call center", "support agent", "CX"]
+    },
+    {
+      "name": "Virtual panels",
+      "keywords": ["synthetic audience", "synthetic respondents", "virtual panel", "consumer research", "market research", "AI interviews", "digital twins of consumers"]
+    },
+    {
+      "name": "Retail AI",
+      "keywords": ["retail", "shopping assistant", "ecommerce", "e-commerce", "retailer", "store operations", "commerce AI"]
+    },
+    {
+      "name": "Physical AI & supply chain",
+      "keywords": ["warehouse", "robotics", "robot", "autonomous truck", "logistics", "supply chain", "physical AI", "humanoid"]
+    },
+    {
+      "name": "Payments & digital euro",
+      "keywords": ["payments", "digital euro", "stablecoin", "CBDC", "wallet", "fintech", "checkout"]
+    },
+    {
+      "name": "Sleep & wearables",
+      "keywords": ["sleep", "wearable", "smart ring", "health tracker", "sleep tech", "biometric"]
+    }
+  ],
+  "big_actors": ["Amazon", "Walmart", "Google", "Alphabet", "Microsoft", "Apple", "Meta", "Salesforce", "Zendesk", "Oracle", "SAP", "Shopify", "Visa", "Mastercard", "PayPal", "Stripe", "Adyen", "Kantar", "Ipsos", "Nielsen", "Qualtrics", "NielsenIQ", "Lidl", "Schwarz", "Carrefour", "Ahold", "Tesco", "Target", "Nvidia", "OpenAI", "Anthropic", "Samsung", "Oura", "Garmin", "ECB", "Klarna", "Alibaba", "JD.com", "Tencent"],
+  "extra_feeds": [
+    { "name": "TechCrunch fundraising", "url": "https://techcrunch.com/category/fundraising/feed/" }
+  ]
+}

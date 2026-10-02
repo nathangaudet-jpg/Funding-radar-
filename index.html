@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Funding radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F1F3F7;--surface:#FFFFFF;--ink:#14213D;--muted:#5B6B82;--line:#D7DDE6;--blue:#2347E8;--blue-soft:#E4E9FD;--green:#0D7A55;--amber:#A15C00;
+  --font:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root{--paper:#0E1522;--surface:#151F31;--ink:#E7ECF4;--muted:#93A1B8;--line:#26324A;--blue:#7D97FF;--blue-soft:#1C2A52;--green:#4CC79A;--amber:#F0B45C}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px}
+.brand{font-weight:700;color:var(--muted);margin:0 0 6px}
+h1{font-size:clamp(30px,5vw,48px);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin:0}
+.sub{color:var(--muted);margin:8px 0 0}
+.nav{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--muted)} .btn[disabled]{opacity:.45;cursor:default}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px 9px;cursor:pointer;font-weight:600;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:14px}
+.chip .n{color:var(--muted);margin-left:6px}
+.chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip[aria-pressed="true"] .n{color:rgba(255,255,255,.8)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+.filters label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.filters select,.filters input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px}
+.filters input{min-width:200px} .spacer{flex:1}
+.list{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 24px;padding:18px 0;border-bottom:1px solid var(--line)}
+.row h3{margin:0;font-size:19px;font-weight:700;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.meta{font-size:13px;color:var(--muted);font-weight:500}
+.what{color:var(--blue);font-weight:600;margin:2px 0 0;max-width:68ch}
+.amount{grid-column:2;grid-row:1/span 2;text-align:right;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.amount small{display:block;font-size:13px;font-weight:500;color:var(--muted)}
+.foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:13px;color:var(--muted);margin-top:6px}
+.foot a{color:var(--ink);text-underline-offset:3px}
+.ok{color:var(--green);font-weight:600} .warn{color:var(--amber);font-weight:600}
+.kind{font-size:12px;font-weight:700;border-radius:4px;padding:1px 6px;background:var(--blue-soft);color:var(--blue)}
+.status{margin-left:auto} .status select{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 6px;font-size:13px}
+.row[data-status="dismissed"]{opacity:.5}
+.empty{padding:40px 0;max-width:60ch} .empty h2{font-size:20px;margin:0 0 8px} .empty p{color:var(--muted);margin:0}
+@media (max-width:640px){.row{grid-template-columns:1fr}.amount{grid-column:1;grid-row:auto;text-align:left;font-size:20px}.amount small{display:inline;margin-left:8px}.filters input{width:100%;min-width:0}.status{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><p class="brand">Funding radar</p><h1 id="title">Loading…</h1><p class="sub" id="sub"></p></div>
+    <div class="nav" id="nav">
+      <button class="btn" id="prev">‹ Previous</button><button class="btn" id="today">This week</button><button class="btn" id="next">Next ›</button>
+    </div>
+  </header>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-week" aria-selected="true">Weekly rounds</button>
+    <button class="tab" role="tab" id="tab-all" aria-selected="false">Full database</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="filters">
+    <label>Region <select id="f-region"><option value="all">All</option><option>Europe</option><option>US</option><option>China</option><option>Unknown</option></select></label>
+    <label>Type <select id="f-kind"><option value="all">All</option><option value="startup">Startups</option><option value="big">Big actors</option></select></label>
+    <label>Status <select id="f-status"><option value="all">All</option><option value="new">New</option><option value="shortlisted">Shortlisted</option><option value="in_deck">In a deck</option><option value="dismissed">Not relevant</option></select></label>
+    <input id="f-q" type="search" placeholder="Search companies, headlines…" aria-label="Search">
+    <span class="spacer"></span><button class="btn" id="export">Export CSV</button>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+<script>
+(function(){
+const STATUS={new:"New",shortlisted:"Shortlisted",in_deck:"In a deck",dismissed:"Not relevant"};
+const S={rounds:[],sweeps:[],fields:[],view:"week",week:monday(new Date()),field:"all",region:"all",kind:"all",status:"all",q:"",marks:{},ready:false,error:""};
+const $=id=>document.getElementById(id);
+try{S.marks=JSON.parse(localStorage.getItem("radar-status")||"{}")||{}}catch(e){S.marks={}}
+function h(t,a,...k){const e=document.createElement(t);for(const x in a||{}){const v=a[x];if(v==null||v===false)continue;if(x==="class")e.className=v;else if(x.startsWith("on"))e.addEventListener(x.slice(2),v);else e.setAttribute(x,v===true?"":v)}for(const c of k.flat())if(c!=null&&c!==false)e.append(c instanceof Node?c:document.createTextNode(String(c)));return e}
+function pad(n){return String(n).padStart(2,"0")}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parse(s){const[y,m,d]=String(s).split("-").map(Number);return new Date(y,(m||1)-1,d||1)}
+function monday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return iso(x)}
+function shift(w,n){const d=parse(w);d.setDate(d.getDate()+n);return iso(d)}
+function day(s,o){return parse(s).toLocaleDateString("en-GB",o||{day:"numeric",month:"short"})}
+function wk(s){const d=parse(s);d.setDate(d.getDate()+3-((d.getDay()+6)%7));const w=new Date(d.getFullYear(),0,4);return 1+Math.round(((d-w)/864e5-3+((w.getDay()+6)%7))/7)}
+function money(r){const m=r.amount_usd_m;if(typeof m!=="number")return "Undisclosed";return m>=1000?"$"+(m/1000).toFixed(1).replace(".0","")+"B":"$"+Math.round(m)+"M"}
+function status(r){return S.marks[r.id]||"new"}
+function rows(){const q=S.q.trim().toLowerCase();return S.rounds.filter(r=>(S.view!=="week"||r.week===S.week)&&(S.field==="all"||r.field===S.field)&&(S.region==="all"||r.region===S.region)&&(S.kind==="all"||r.kind===S.kind)&&(S.status==="all"||status(r)===S.status)&&(!q||[r.company,r.headline,r.what,r.country,r.source_name].join(" ").toLowerCase().includes(q))).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.amount_usd_m||0)-(a.amount_usd_m||0))}
+function render(){
+  const now=monday(new Date());
+  if(S.view==="week"){
+    $("title").textContent="Week "+wk(S.week)+", "+day(S.week)+" – "+day(shift(S.week,6),{day:"numeric",month:"short",year:"numeric"});
+    const sw=S.sweeps.find(s=>s.week===S.week);
+    $("sub").textContent=sw?"Swept "+new Date(sw.ran_at).toLocaleString("en-GB",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})+", covering the 7 days before. "+sw.feeds_checked+" feeds checked"+(sw.feed_errors&&sw.feed_errors.length?", "+sw.feed_errors.length+" could not be read.":"."):(S.week===now?"This week's sweep hasn't run yet. It runs automatically on Monday morning.":"No sweep recorded for this week.");
+    $("nav").hidden=false;$("next").disabled=S.week>=now;
+  }else{$("title").textContent="All tracked rounds";$("sub").textContent=S.rounds.length+" rounds since the first sweep.";$("nav").hidden=true}
+  $("tab-week").setAttribute("aria-selected",S.view==="week");$("tab-all").setAttribute("aria-selected",S.view==="all");
+  const scope=S.rounds.filter(r=>S.view!=="week"||r.week===S.week);
+  const names=S.fields.length?S.fields:[...new Set(S.rounds.map(r=>r.field))];
+  $("chips").replaceChildren(h("button",{class:"chip","aria-pressed":S.field==="all",onclick:()=>{S.field="all";render()}},"All fields",h("span",{class:"n"},scope.length)),...names.map(f=>h("button",{class:"chip","aria-pressed":S.field===f,onclick:()=>{S.field=f;render()}},f,h("span",{class:"n"},scope.filter(r=>r.field===f).length))));
+  const list=rows();$("export").disabled=!list.length;
+  let body;
+  if(!S.ready)body=[h("div",{class:"empty"},h("p",null,"Loading…"))];
+  else if(S.error)body=[h("div",{class:"empty"},h("h2",null,"No data yet"),h("p",null,S.error))];
+  else if(!list.length)body=[h("div",{class:"empty"},h("h2",null,scope.length?"No rounds match these filters":"No rounds for this week"),h("p",null,scope.length?"Clear a filter or pick another field.":"Pick another week, or run the sweep from the Actions tab on GitHub."))];
+  else body=list.map(rowEl);
+  $("list").replaceChildren(...body);
+}
+function rowEl(r){
+  const st=status(r);
+  const sel=h("select",{"aria-label":"Status for "+r.company,onchange:e=>{S.marks[r.id]=e.target.value;try{localStorage.setItem("radar-status",JSON.stringify(S.marks))}catch(_){}render()}},...Object.entries(STATUS).map(([k,v])=>h("option",{value:k,selected:k===st},v)));
+  const place=r.region==="Unknown"?h("span",{class:"warn"},"Region unknown"):[r.country,r.region].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(", ");
+  return h("article",{class:"row","data-status":st},
+    h("h3",null,r.company,r.kind==="big"?h("span",{class:"kind"},"Big actor"):null,h("span",{class:"meta"},r.field," / ",place)),
+    h("div",{class:"amount"},money(r),h("small",null,[r.stage,r.date?day(r.date):""].filter(Boolean).join(", "))),
+    h("p",{class:"what"},r.headline),
+    h("div",{class:"foot"},
+      r.source_url?h("span",null,h("a",{href:r.source_url,target:"_blank",rel:"noopener noreferrer"},r.source_name||"Source")," ",h("span",{class:r.first_party?"ok":"warn"},r.first_party?"first-party":"secondary")):null,
+      r.amount_label?h("span",null,"Reported as ",r.amount_label):null,
+      h("span",{class:"status"},sel)));
+}
+function cell(v){const s=v==null?"":String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+$("export").onclick=()=>{const cols=["company","kind","field","headline","amount","stage","date","country","region","status","source_name","source_url","first_party"];
+  const csv=[cols.join(",")].concat(rows().map(r=>cols.map(c=>cell(c==="amount"?money(r):c==="status"?STATUS[status(r)]:c==="kind"?(r.kind==="big"?"Big actor":"Startup"):r[c])).join(","))).join("\n");
+  const a=h("a",{href:URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv"})),download:S.view==="week"?"funding-radar-week-"+wk(S.week)+".csv":"funding-radar-all.csv"});document.body.append(a);a.click();a.remove()};
+$("prev").onclick=()=>{S.week=shift(S.week,-7);render()};$("next").onclick=()=>{S.week=shift(S.week,7);render()};$("today").onclick=()=>{S.week=monday(new Date());render()};
+$("tab-week").onclick=()=>{S.view="week";render()};$("tab-all").onclick=()=>{S.view="all";render()};
+$("f-region").onchange=e=>{S.region=e.target.value;render()};$("f-kind").onchange=e=>{S.kind=e.target.value;render()};$("f-status").onchange=e=>{S.status=e.target.value;render()};
+let t;$("f-q").oninput=e=>{clearTimeout(t);t=setTimeout(()=>{S.q=e.target.value;render()},150)};
+render();
+const get=p=>fetch(p+"?v="+Date.now()).then(r=>{if(!r.ok)throw new Error(p);return r.json()});
+Promise.allSettled([get("data/rounds.json"),get("data/sweeps.json"),get("config.json")]).then(([a,b,c])=>{
+  S.ready=true;
+  if(a.status==="fulfilled")S.rounds=a.value;else S.error="The first sweep hasn't run yet. Open the Actions tab on GitHub and run \"Monday funding sweep\".";
+  if(b.status==="fulfilled")S.sweeps=b.value;
+  if(c.status==="fulfilled")S.fields=(c.value.fields||[]).map(f=>f.name);
+  render();
+});
+})();
+</script>
+</body>
+</html>
