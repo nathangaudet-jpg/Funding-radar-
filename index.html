@@ -13,11 +13,12 @@
   --white:#FFFFFF;--black:#000000;--grey:#F4F4F4;
   --yellow:#FFC835;--orange:#FA3D43;--magenta:#D82170;--purple:#6F26CA;--blue:#5496E0;
   --blueline:#2330FF; /* the SLI slide "blue line" */
+  --softmagenta:#D45A8C; /* softened brand magenta for flags */
   --paper:var(--white);--surface:var(--grey);--ink:var(--black);--muted:#5F5F5F;--line:#E3E3E3;
   --spectrum:linear-gradient(180deg,var(--blue) 0%,var(--purple) 30%,var(--magenta) 55%,var(--orange) 78%,var(--yellow) 100%);
   --font:"Montserrat",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
   box-sizing:border-box}
-@media (prefers-color-scheme:dark){:root{--paper:#000000;--surface:#161616;--ink:#FFFFFF;--muted:#A8A8A8;--line:#2A2A2A;--blueline:#8C93FF}}
+@media (prefers-color-scheme:dark){:root{--paper:#000000;--surface:#161616;--ink:#FFFFFF;--muted:#A8A8A8;--line:#2A2A2A;--blueline:#8C93FF;--softmagenta:#F08BB5}}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
 button,select,input{font:inherit;color:inherit}
@@ -69,8 +70,10 @@ h1{font-size:clamp(28px,4.6vw,46px);font-weight:600;letter-spacing:-.01em;line-h
 .amount small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
 .foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
 .foot a{color:var(--ink);text-underline-offset:3px}
-.ok{color:var(--purple);font-weight:600} .warn{color:var(--orange);font-weight:600}
-@media (prefers-color-scheme:dark){.ok{color:#B58CFF}}
+.ok,.warn{font-weight:600;white-space:nowrap}
+.ok{color:var(--ink)} .warn{color:var(--softmagenta)}
+.ok::before,.warn::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.ok::before{background:var(--purple)} .warn::before{background:var(--softmagenta)}
 .kind{font-size:11px;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--purple);color:#fff}
 .status{margin-left:auto} .status select{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:3px 6px;font-size:13px}
 .row[data-status="dismissed"]{opacity:.45}
