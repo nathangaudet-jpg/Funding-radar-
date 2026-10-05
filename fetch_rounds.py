@@ -177,6 +177,148 @@ def is_first_party(item, company):
     return any(w in dom for w in WIRES) or (bool(company) and norm(company)[:6] in norm(item["source"] + dom))
 
 
+# ---------- Finding a company's location when the headline doesn't say ----------
+WD_COUNTRIES = {  # Wikidata country ids -> (country, region)
+    "Q30": ("US", "North America"), "Q16": ("Canada", "North America"),
+    "Q17": ("Japan", "Asia"), "Q148": ("China", "Asia"), "Q8646": ("China", "Asia"),
+    "Q145": ("UK", "Europe"), "Q183": ("Germany", "Europe"), "Q142": ("France", "Europe"),
+    "Q55": ("Netherlands", "Europe"), "Q34": ("Sweden", "Europe"), "Q35": ("Denmark", "Europe"),
+    "Q33": ("Finland", "Europe"), "Q20": ("Norway", "Europe"), "Q29": ("Spain", "Europe"),
+    "Q38": ("Italy", "Europe"), "Q39": ("Switzerland", "Europe"), "Q27": ("Ireland", "Europe"),
+    "Q36": ("Poland", "Europe"), "Q191": ("Estonia", "Europe"), "Q37": ("Lithuania", "Europe"),
+    "Q211": ("Latvia", "Europe"), "Q45": ("Portugal", "Europe"), "Q31": ("Belgium", "Europe"),
+    "Q40": ("Austria", "Europe"), "Q213": ("Czechia", "Europe"), "Q218": ("Romania", "Europe"),
+    "Q41": ("Greece", "Europe"), "Q28": ("Hungary", "Europe"), "Q32": ("Luxembourg", "Europe"),
+    "Q224": ("Croatia", "Europe"), "Q215": ("Slovenia", "Europe"), "Q214": ("Slovakia", "Europe"),
+    "Q219": ("Bulgaria", "Europe"), "Q189": ("Iceland", "Europe"), "Q212": ("Ukraine", "Europe"),
+    "Q229": ("Cyprus", "Europe"), "Q233": ("Malta", "Europe"), "Q403": ("Serbia", "Europe"),
+    "Q668": ("India", "Other"), "Q801": ("Israel", "Other"), "Q334": ("Singapore", "Other"),
+    "Q884": ("South Korea", "Other"), "Q408": ("Australia", "Other"), "Q155": ("Brazil", "Other"),
+    "Q865": ("Taiwan", "Other"), "Q252": ("Indonesia", "Other"), "Q881": ("Vietnam", "Other"),
+    "Q96": ("Mexico", "Other"), "Q878": ("UAE", "Other"), "Q851": ("Saudi Arabia", "Other"),
+    "Q1033": ("Nigeria", "Other"), "Q114": ("Kenya", "Other"), "Q258": ("South Africa", "Other"),
+    "Q43": ("Turkey", "Other"), "Q664": ("New Zealand", "Other"), "Q414": ("Argentina", "Other"),
+}
+SOURCE_HINTS = {  # outlets that mostly cover one region
+    "eu-startups.com": ("", "Europe"), "sifted.eu": ("", "Europe"), "tech.eu": ("", "Europe"),
+    "maddyness.com": ("France", "Europe"), "frenchweb.fr": ("France", "Europe"),
+    "gruenderszene.de": ("Germany", "Europe"), "deutsche-startups.de": ("Germany", "Europe"),
+    "uktn.co.uk": ("UK", "Europe"), "uktech.news": ("UK", "Europe"), "siliconcanals.com": ("", "Europe"),
+    "betakit.com": ("Canada", "North America"), "technode.com": ("China", "Asia"),
+    "36kr.com": ("China", "Asia"), "pandaily.com": ("China", "Asia"), "thebridge.jp": ("Japan", "Asia"),
+    "inc42.com": ("India", "Other"), "yourstory.com": ("India", "Other"), "entrackr.com": ("India", "Other"),
+    "calcalistech.com": ("Israel", "Other"), "techinasia.com": ("", "Other"), "e27.co": ("", "Other"),
+}
+TLD_HINTS = {".de": ("Germany", "Europe"), ".fr": ("France", "Europe"), ".it": ("Italy", "Europe"),
+             ".es": ("Spain", "Europe"), ".nl": ("Netherlands", "Europe"), ".se": ("Sweden", "Europe"),
+             ".dk": ("Denmark", "Europe"), ".fi": ("Finland", "Europe"), ".no": ("Norway", "Europe"),
+             ".pl": ("Poland", "Europe"), ".at": ("Austria", "Europe"), ".be": ("Belgium", "Europe"),
+             ".ch": ("Switzerland", "Europe"), ".ie": ("Ireland", "Europe"), ".pt": ("Portugal", "Europe"),
+             ".uk": ("UK", "Europe"), ".eu": ("", "Europe"), ".jp": ("Japan", "Asia"),
+             ".cn": ("China", "Asia"), ".ca": ("Canada", "North America"), ".in": ("India", "Other")}
+COMPANY_WORDS = re.compile(r"compan|startup|business|firm|developer|manufacturer|platform|provider|maker|bank|fintech|enterprise|software|service|brand|retailer|lab", re.I)
+MEMORY = {}      # company -> [country, region], saved in data/companies.json
+_WD_CACHE = {}
+
+
+def country_region(name):
+    """Map a country name written by the user (overrides) to (country, region)."""
+    for pat, country, region in PLACES:
+        if re.search(pat, name, re.I):
+            return country or name, region
+    for c, r in WD_COUNTRIES.values():
+        if c.lower() == name.lower():
+            return c, r
+    return name, "Other"
+
+
+def _wd(params):
+    url = "https://www.wikidata.org/w/api.php?" + urllib.parse.urlencode(dict(params, format="json"))
+    req = urllib.request.Request(url, headers={"User-Agent": "funding-radar/1.0 (personal scouting tool)"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.loads(r.read())
+
+
+def _claim_id(entity, prop):
+    try:
+        return entity["claims"][prop][0]["mainsnak"]["datavalue"]["value"]["id"]
+    except Exception:
+        return None
+
+
+def wikidata_location(company):
+    """Look the company up on Wikidata (free): description first, then country / HQ claims."""
+    if company in _WD_CACHE:
+        return _WD_CACHE[company]
+    result = ("", "")
+    try:
+        hits = _wd({"action": "wbsearchentities", "search": company, "language": "en", "type": "item", "limit": 5}).get("search", [])
+        hit = next((h for h in hits if COMPANY_WORDS.search(h.get("description", ""))
+                    and norm(h.get("label", "")) == norm(company)), None)
+        if hit:
+            c, r = detect_place(hit.get("description", ""))
+            if r:
+                result = (c, r)
+            else:
+                ent = _wd({"action": "wbgetentities", "ids": hit["id"], "props": "claims"})["entities"][hit["id"]]
+                qid = _claim_id(ent, "P17")
+                if not qid:
+                    hq = _claim_id(ent, "P159")
+                    if hq:
+                        city = _wd({"action": "wbgetentities", "ids": hq, "props": "claims"})["entities"][hq]
+                        qid = _claim_id(city, "P17")
+                result = WD_COUNTRIES.get(qid, ("", ""))
+    except Exception as e:
+        print("   Wikidata lookup failed for", company, "-", e)
+    _WD_CACHE[company] = result
+    return result
+
+
+DATELINE_RE = re.compile(r"\b([A-Z][A-Z .'-]{2,30}),\s+(?:[A-Z][a-z]{2,9}\.?\s+\d{1,2},\s+\d{4}|\d{1,2}\s+[A-Z][a-z]{2,9}\s+\d{4})")
+
+
+def article_dateline(link):
+    """Press releases start with a dateline like 'BERLIN, Oct. 1, 2026'. Only for direct links."""
+    if not link or "news.google.com" in link:
+        return "", ""
+    try:
+        raw = fetch(link)[:400000].decode("utf-8", "ignore")
+        text = re.sub(r"<[^>]+>", " ", re.sub(r"(?s)<(script|style).*?</\1>", " ", raw))
+        m = DATELINE_RE.search(text)
+        if m:
+            return detect_place(m.group(1).title())
+    except Exception:
+        pass
+    return "", ""
+
+
+def source_hint(domain):
+    domain = (domain or "").lower().replace("www.", "")
+    for d, loc in SOURCE_HINTS.items():
+        if domain.endswith(d):
+            return loc
+    for tld, loc in TLD_HINTS.items():
+        if domain.endswith(tld) or domain.endswith(tld + "/"):
+            return loc
+    return "", ""
+
+
+def resolve_location(company, link="", domain=""):
+    """Try, in order: your manual list, companies seen before, Wikidata, press-release dateline, outlet."""
+    key = norm(company)
+    for name, place in CONFIG.get("company_locations", {}).items():
+        if norm(name) == key:
+            return country_region(place)
+    if key in MEMORY:
+        return tuple(MEMORY[key])
+    for finder in (lambda: wikidata_location(company), lambda: article_dateline(link)):
+        c, r = finder()
+        if r:
+            MEMORY[key] = [c, r]
+            return c, r
+    return source_hint(domain)  # weakest hint, not remembered
+
+
 def classify(item, field_hint):
     text = item["title"] + " " + item["summary"]
     fields = [field_hint] if field_hint else match_fields(text)
@@ -197,7 +339,15 @@ def classify(item, field_hint):
         company = actor
     if not company:
         return None
+    min_limit = min([a["threshold_musd"] for a in CONFIG["scouting_areas"]] + [CONFIG["unknown_region"]["threshold_musd"]])
+    if kind == "startup" and musd < min_limit:
+        return None
+    domain = urllib.parse.urlparse(item.get("source_url") or item.get("link") or "").netloc
     country, region = detect_place(item["title"], item["summary"])
+    if region and company and region != "Other":
+        MEMORY[norm(company)] = [country, region]
+    if not region:
+        country, region = resolve_location(company, item.get("link", ""), domain)
     low = (label or "").lower()
     if not region and label and ("€" in label or "eur" in low or "£" in label or "gbp" in low):
         region = "Europe"
@@ -215,7 +365,7 @@ def classify(item, field_hint):
         "stage": stage.group(0).title() if stage else "",
         "country": country, "region": region,
         "date": item["published"].date().isoformat() if item["published"] else "",
-        "source_name": item["source"], "source_url": item["link"],
+        "source_name": item["source"], "source_url": item["link"], "source_domain": domain,
         "first_party": is_first_party(item, company),
     }
 
@@ -230,6 +380,25 @@ def main():
     rounds_path, sweeps_path = DATA / "rounds.json", DATA / "sweeps.json"
     rounds = json.loads(rounds_path.read_text(encoding="utf-8")) if rounds_path.exists() else []
     sweeps = json.loads(sweeps_path.read_text(encoding="utf-8")) if sweeps_path.exists() else []
+    mem_path = DATA / "companies.json"
+    if mem_path.exists():
+        MEMORY.update(json.loads(mem_path.read_text(encoding="utf-8")))
+
+    # Backfill: try again to locate rounds stored as "Region unknown"
+    kept, fixed, dropped = [], 0, 0
+    for r in rounds:
+        if r.get("region") == "Unknown" and fixed + dropped < 60:
+            c, reg = resolve_location(r["company"], r.get("source_url", ""), r.get("source_domain", ""))
+            if reg:
+                limit = area_threshold(c, reg)
+                if limit is None or (r.get("kind") == "startup" and (r.get("amount_usd_m") or 0) < limit):
+                    dropped += 1
+                    continue
+                r["country"], r["region"] = c, reg
+                fixed += 1
+        kept.append(r)
+    rounds = kept
+    print(f"Backfill: located {fixed} earlier rounds, removed {dropped} outside your areas")
 
     today = date.today()
     week = (today - timedelta(days=today.weekday())).isoformat()
@@ -279,6 +448,7 @@ def main():
         "count": len(new) + sum(1 for r in rounds if r.get("week") == week and r not in new),
         "feeds_checked": len(jobs), "feed_errors": errors[:10]}]
     rounds_path.write_text(json.dumps(rounds, indent=1, ensure_ascii=False), encoding="utf-8")
+    mem_path.write_text(json.dumps(MEMORY, indent=1, ensure_ascii=False, sort_keys=True), encoding="utf-8")
     sweeps_path.write_text(json.dumps(sweeps, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"Week {week}: {len(new)} new rounds, {len(errors)} feed errors")
     for e in errors:
