@@ -8,9 +8,18 @@
  },
  {
   "week": "2026-10-05",
-  "ran_at": "2026-10-05T12:29+00:00",
-  "count": 44,
+  "ran_at": "2026-10-05T12:40+00:00",
+  "count": 26,
   "feeds_checked": 25,
-  "feed_errors": []
+  "feed_errors": [
+   "Google News: <urlopen error _ssl.c:993: The handshake operation timed out>"
+  ],
+  "location_lookups": {
+   "wikidata_found": 4,
+   "wikidata_errors": 0,
+   "news_found": 17,
+   "news_errors": 0,
+   "first_error": ""
+  }
  }
 ]
