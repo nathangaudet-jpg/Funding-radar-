@@ -246,5 +246,8 @@
     }
   ],
   "jpy_to_usd": 0.0067,
-  "cny_to_usd": 0.14
+  "cny_to_usd": 0.14,
+  "company_locations": {
+    "_example: Company name": "Country"
+  }
 }
