@@ -17,6 +17,8 @@ CONFIG = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
 FUND_VERBS = r"(raises|raised|secures|secured|closes|closed|lands|bags|nabs|snags|gets|picks up|scores|collects|attracts|announces|completes)"
 VERB_RE = re.compile(r"\b" + FUND_VERBS + r"\b", re.I)
 FUNDING_HINT = re.compile(r"\b(funding|round|series [a-h]|seed|investment|raises|raised|secures|valuation)\b", re.I)
+NOT_FUNDING = re.compile(r"\b(bonds?|issuers|placing|registered direct offering|at-the-market|securiti[sz]ation|debt|loan|credit facility|outlook|guidance|revenue|worries|concerns|price target|dividend|buyback|reverse split|stake sale|stock offering|public offering)\b", re.I)
+NOT_FUNDING_CS = re.compile(r"\b(IPO|ATM|EBIT|EBITDA)\b")
 ACQ_RE = re.compile(r"\b(acquires|acquired|to acquire|acquisition of|buys|invests in|takes stake|leads investment)\b", re.I)
 AMOUNT_RE = re.compile(
     r"(?P<cur>US\$|C\$|CA\$|\$|€|£|USD\s?|EUR\s?|GBP\s?|JPY\s?|CNY\s?|RMB\s?)?\s?(?P<num>\d{1,4}(?:[.,]\d{1,3})?)\s?"
@@ -50,7 +52,7 @@ PLACES = [  # (pattern, country, region)
     (r"\b(Japanese|Japan|Tokyo|Osaka|Kyoto)\b", "Japan", "Asia"),
     (r"\b(Chinese|China|Beijing|Shanghai|Shenzhen|Hangzhou|Hong Kong)\b", "China", "Asia"),
     # outside the scouting areas: rounds from these places are dropped
-    (r"\b(Indian|India|Bengaluru|Bangalore|Mumbai|Delhi|Israeli|Israel|Tel Aviv|Singapore|Singaporean|Korean|Korea|Seoul|Taiwan|Taiwanese|Indonesian|Indonesia|Jakarta|Vietnam|Vietnamese|Australian|Australia|Sydney|Melbourne|New Zealand|Brazilian|Brazil|Sao Paulo|Mexican|Mexico|Argentina|Chile|Colombia|UAE|Dubai|Abu Dhabi|Saudi|Riyadh|Egypt|Nigeria|Nigerian|Kenya|Kenyan|South Africa|Turkish|Turkey|Istanbul|Pakistan)\b", "", "Other"),
+    (r"\b(Indian|India|Bengaluru|Bangalore|Mumbai|Delhi|Israeli|Israel|Tel Aviv|Singapore|Singaporean|Korean|Korea|Seoul|Taiwan|Taiwanese|Indonesian|Indonesia|Jakarta|Vietnam|Vietnamese|Australian|Australia|Sydney|Melbourne|New Zealand|Brazilian|Brazil|Sao Paulo|Mexican|Mexico|Argentina|Chile|Colombia|UAE|Dubai|Abu Dhabi|Saudi|Riyadh|Egypt|Egyptian|Colombian|Peruvian|Chilean|Nigeria|Nigerian|Kenya|Kenyan|South Africa|Turkish|Turkey|Istanbul|Pakistan)\b", "", "Other"),
 ]
 
 
@@ -110,22 +112,38 @@ def parse_amount(text):
     return None, None
 
 
+DESCRIPTORS = {"startup", "start-up", "company", "firm", "platform", "maker", "chipmaker", "developer",
+               "provider", "fintech", "insurtech", "proptech", "legaltech", "healthtech", "unicorn", "giant",
+               "specialist", "agent", "database", "app", "ai", "robotics", "software", "saas", "tool", "chip",
+               "team", "lead", "model", "law", "group", "operator", "brand", "scaleup", "scale-up"}
+
+
 def parse_company(title):
     m = VERB_RE.search(title)
     if not m:
         return None, ""
-    before = re.sub(r"^(exclusive|breaking|update|report)\s*[:\-–]\s*", "", title[: m.start()].strip(), flags=re.I)
+    before = title[: m.start()].strip()
+    before = re.split(r"[:}|]\s*", before)[-1]          # "Exclusive: X", "{Funding Alert} X"
+    if ", " in before:
+        before = before.split(", ")[0]                   # "X, founded by ..., raises"
     words = before.replace("’", "'").split()
     name = []
     for w in reversed(words):
-        if w.lower().endswith(("-based", "-headquartered")):
-            break
+        lw = w.lower().strip(",")
+        if lw.startswith(("ex-", "former")) or (lw.endswith("'s") or "-based" in lw or "-led" in lw or "-backed" in lw
+                or "-headquartered" in lw or re.search(r"-[a-z]", w)):
+            break                                        # "London's", "Paris-based", "Nine-person"
+        if name and (lw in DESCRIPTORS or any(re.fullmatch(pat, w) for pat, _, _ in PLACES)):
+            break                                        # "Platform Supabase", "Miami Fintech Jeeves"
         if w[:1].isupper() or w[:1].isdigit():
             name.insert(0, w)
         else:
             break
+    while name and name[0].lower() in DESCRIPTORS:        # "Startup Reco" -> "Reco"
+        name.pop(0)
+    if name and all(w.lower() in DESCRIPTORS for w in name):
+        name = []
     company = " ".join(name).strip(" ,:;'\"")
-    company = re.sub(r"'s$", "", company)
     descriptor = " ".join(words[: len(words) - len(name)]).strip(" ,")
     return (company or None), descriptor
 
@@ -218,7 +236,16 @@ TLD_HINTS = {".de": ("Germany", "Europe"), ".fr": ("France", "Europe"), ".it": (
              ".cn": ("China", "Asia"), ".ca": ("Canada", "North America"), ".in": ("India", "Other")}
 COMPANY_WORDS = re.compile(r"compan|startup|business|firm|developer|manufacturer|platform|provider|maker|bank|fintech|enterprise|software|service|brand|retailer|lab", re.I)
 MEMORY = {}      # company -> [country, region], saved in data/companies.json
+STATS = {"wikidata_found": 0, "wikidata_errors": 0, "news_found": 0, "news_errors": 0, "first_error": ""}
+
+
+def _err(kind, company, e):
+    STATS[kind] += 1
+    if not STATS["first_error"]:
+        STATS["first_error"] = f"{kind[:-7]} lookup for {company}: {e}"[:300]
 _WD_CACHE = {}
+NOT_FOUND = {}   # company -> date last searched without success (retried after 14 days)
+LOOKUPS = {"left": 80}   # max new company lookups per run
 
 
 def country_region(name):
@@ -234,7 +261,9 @@ def country_region(name):
 
 def _wd(params):
     url = "https://www.wikidata.org/w/api.php?" + urllib.parse.urlencode(dict(params, format="json"))
-    req = urllib.request.Request(url, headers={"User-Agent": "funding-radar/1.0 (personal scouting tool)"})
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "FundingRadar/1.1 (https://github.com/nathangaudet-jpg/Funding-radar-; weekly funding scouting) python-urllib",
+        "Accept": "application/json"})
     with urllib.request.urlopen(req, timeout=15) as r:
         return json.loads(r.read())
 
@@ -269,9 +298,38 @@ def wikidata_location(company):
                         qid = _claim_id(city, "P17")
                 result = WD_COUNTRIES.get(qid, ("", ""))
     except Exception as e:
-        print("   Wikidata lookup failed for", company, "-", e)
+        _err("wikidata_errors", company, e)
+    if result[1]:
+        STATS["wikidata_found"] += 1
     _WD_CACHE[company] = result
     return result
+
+
+def news_location(company):
+    """Search Google News for other headlines about the company, e.g. 'Paris-based Inbolt'."""
+    try:
+        q = urllib.parse.quote(f'"{company}"')
+        items = parse_feed(fetch(f"https://news.google.com/rss/search?q={q}&hl=en-US&gl=US&ceid=US:en"), "lookup")
+    except Exception as e:
+        _err("news_errors", company, e)
+        return "", ""
+    votes = {}
+    for it in items[:30]:
+        for text in (it["title"], it["summary"]):
+            i = text.lower().find(company.lower())
+            if i < 0:
+                continue
+            c, r = detect_place(text[max(0, i - 45): i])   # place words just before the name
+            if r:
+                votes[(c, r)] = votes.get((c, r), 0) + 1
+    time.sleep(1)
+    if votes:
+        best = max(votes, key=votes.get)
+        regions = {r for _, r in votes}
+        if len(regions) == 1 or votes[best] >= 2:
+            STATS["news_found"] += 1
+            return best
+    return "", ""
 
 
 DATELINE_RE = re.compile(r"\b([A-Z][A-Z .'-]{2,30}),\s+(?:[A-Z][a-z]{2,9}\.?\s+\d{1,2},\s+\d{4}|\d{1,2}\s+[A-Z][a-z]{2,9}\s+\d{4})")
@@ -311,11 +369,19 @@ def resolve_location(company, link="", domain=""):
             return country_region(place)
     if key in MEMORY:
         return tuple(MEMORY[key])
-    for finder in (lambda: wikidata_location(company), lambda: article_dateline(link)):
-        c, r = finder()
-        if r:
-            MEMORY[key] = [c, r]
-            return c, r
+    checked = NOT_FOUND.get(key, "")
+    if checked and checked > (date.today() - timedelta(days=14)).isoformat():
+        return source_hint(domain)
+    if LOOKUPS["left"] > 0:
+        LOOKUPS["left"] -= 1
+        for finder in (lambda: wikidata_location(company), lambda: news_location(company),
+                       lambda: article_dateline(link)):
+            c, r = finder()
+            if r:
+                MEMORY[key] = [c, r]
+                NOT_FOUND.pop(key, None)
+                return c, r
+        NOT_FOUND[key] = date.today().isoformat()
     return source_hint(domain)  # weakest hint, not remembered
 
 
@@ -327,10 +393,17 @@ def classify(item, field_hint):
     musd, label = parse_amount(item["title"])
     if musd is None:
         musd, label = parse_amount(item["summary"])
-    actor = big_actor_in(item["title"])
-    if actor and ACQ_RE.search(item["title"]):
+    title = item["title"]
+    if NOT_FUNDING.search(title) or NOT_FUNDING_CS.search(title):
+        return None
+    actor = big_actor_in(title)
+    acq = ACQ_RE.search(title)
+    verb = VERB_RE.search(title)
+    if actor and acq and title.find(actor) < acq.start() and title.find(actor) < 25:
         kind = "big"
-    elif VERB_RE.search(item["title"]) and FUNDING_HINT.search(text) and musd:
+    elif verb and musd and FUNDING_HINT.search(text) and (
+            parse_amount(title[verb.end(): verb.end() + 40])[0] or
+            re.match(r"\W*(\w+\W+){0,3}?(funding|round|series|seed)", title[verb.end():], re.I)):
         kind = "startup"
     else:
         return None
@@ -375,6 +448,36 @@ def queries_for(field):
     return [f"({kw}) (raises OR funding OR \"Series A\" OR \"Series B\" OR \"Series C\" OR acquires)"]
 
 
+def same_round(a, b):
+    na, nb = norm(a["company"]), norm(b["company"])
+    close = abs((a.get("amount_usd_m") or 0) - (b.get("amount_usd_m") or 0)) <= 0.08 * max(a.get("amount_usd_m") or 1, b.get("amount_usd_m") or 1)
+    return a.get("kind") == b.get("kind") and (na == nb or (na[:4] == nb[:4] and close))
+
+
+def weeks_apart(a, b):
+    try:
+        return abs((date.fromisoformat(a["week"]) - date.fromisoformat(b["week"])).days)
+    except Exception:
+        return 0
+
+
+def dedupe(rows):
+    """Merge the same round reported by several outlets ('Jeeves' / 'Jeevs' / 'Miami Fintech Jeeves')."""
+    out = []
+    for r in rows:
+        twin = next((o for o in out if weeks_apart(o, r) <= 14 and same_round(o, r)), None)
+        if twin is None:
+            out.append(r)
+        else:
+            if (twin.get("region") == "Unknown" and r.get("region") != "Unknown") or (r.get("first_party") and not twin.get("first_party")):
+                keep_id = twin.get("id")
+                twin.update(r)
+                twin["id"] = keep_id
+            if len(r["company"]) < len(twin["company"]) and norm(twin["company"]).endswith(norm(r["company"])):
+                twin["company"] = r["company"]
+    return out
+
+
 def main():
     DATA.mkdir(exist_ok=True)
     rounds_path, sweeps_path = DATA / "rounds.json", DATA / "sweeps.json"
@@ -384,21 +487,26 @@ def main():
     if mem_path.exists():
         MEMORY.update(json.loads(mem_path.read_text(encoding="utf-8")))
 
-    # Backfill: try again to locate rounds stored as "Region unknown"
-    kept, fixed, dropped = [], 0, 0
+    NOT_FOUND.update(MEMORY.pop("_not_found", {}))
+
+    # Re-check stored rounds with the current rules: clean names, drop non-funding news, locate
+    kept, dropped = [], 0
     for r in rounds:
-        if r.get("region") == "Unknown" and fixed + dropped < 60:
-            c, reg = resolve_location(r["company"], r.get("source_url", ""), r.get("source_domain", ""))
-            if reg:
-                limit = area_threshold(c, reg)
-                if limit is None or (r.get("kind") == "startup" and (r.get("amount_usd_m") or 0) < limit):
-                    dropped += 1
-                    continue
-                r["country"], r["region"] = c, reg
-                fixed += 1
-        kept.append(r)
-    rounds = kept
-    print(f"Backfill: located {fixed} earlier rounds, removed {dropped} outside your areas")
+        if not r.get("headline"):
+            kept.append(r)
+            continue
+        item = {"title": r["headline"], "summary": "", "link": r.get("source_url", ""),
+                "source": r.get("source_name", ""), "published": None,
+                "source_url": ("https://" + r["source_domain"]) if r.get("source_domain") else ""}
+        fresh = classify(item, r.get("field"))
+        if fresh is None:
+            dropped += 1
+            continue
+        for k in ("id", "week", "date", "source_url", "source_domain"):
+            fresh[k] = r.get(k, fresh.get(k))
+        kept.append(fresh)
+    rounds = dedupe(kept)
+    print(f"Re-check: kept {len(rounds)} stored rounds, removed {dropped} (not funding news or outside your areas)")
 
     today = date.today()
     week = (today - timedelta(days=today.weekday())).isoformat()
@@ -442,12 +550,13 @@ def main():
         r["id"] = hashlib.sha1((key + week).encode()).hexdigest()[:12]
         new.append(r)
 
-    rounds.extend(sorted(new, key=lambda r: -(r["amount_usd_m"] or 0)))
+    rounds = dedupe(rounds + sorted(new, key=lambda r: -(r["amount_usd_m"] or 0)))
     sweeps = [s for s in sweeps if s["week"] != week] + [{
         "week": week, "ran_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
-        "count": len(new) + sum(1 for r in rounds if r.get("week") == week and r not in new),
-        "feeds_checked": len(jobs), "feed_errors": errors[:10]}]
+        "count": sum(1 for r in rounds if r.get("week") == week),
+        "feeds_checked": len(jobs), "feed_errors": errors[:10], "location_lookups": STATS}]
     rounds_path.write_text(json.dumps(rounds, indent=1, ensure_ascii=False), encoding="utf-8")
+    MEMORY["_not_found"] = NOT_FOUND
     mem_path.write_text(json.dumps(MEMORY, indent=1, ensure_ascii=False, sort_keys=True), encoding="utf-8")
     sweeps_path.write_text(json.dumps(sweeps, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"Week {week}: {len(new)} new rounds, {len(errors)} feed errors")
