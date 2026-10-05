@@ -5,5 +5,12 @@
   "count": 34,
   "feeds_checked": 13,
   "feed_errors": []
+ },
+ {
+  "week": "2026-10-05",
+  "ran_at": "2026-10-05T05:21+00:00",
+  "count": 42,
+  "feeds_checked": 25,
+  "feed_errors": []
  }
 ]
