@@ -1,115 +1,97 @@
 {
- "_not_found": {
-  "arceus": "2026-10-05",
-  "carpoollogistics": "2026-10-05",
-  "digerobotics": "2026-10-05",
-  "doxxnet": "2026-10-05",
-  "efficientcomputer": "2026-10-05",
-  "flatkey": "2026-10-05",
-  "flowengineering": "2026-10-05",
-  "generalintuition": "2026-10-05",
-  "halluminate": "2026-10-05",
-  "harvey": "2026-10-05",
-  "hifi": "2026-10-05",
-  "hiyo": "2026-10-05",
-  "instinct": "2026-10-05",
-  "jeevs": "2026-10-05",
-  "meshwallet": "2026-10-05",
-  "modulate": "2026-10-05",
-  "noyinintelligence": "2026-10-05",
-  "outersignal": "2026-10-05",
-  "parakeethealth": "2026-10-05",
-  "rain": "2026-10-05",
-  "sealy": "2026-10-05",
-  "simaai": "2026-10-05",
-  "topsort": "2026-10-05",
-  "tujian": "2026-10-05"
- },
- "arceuslegal": [
-  "US",
-  "North America"
- ],
  "armadin": [
   "US",
   "North America"
  ],
- "atomic": [
-  "",
-  "Other"
- ],
- "atum": [
-  "Netherlands",
-  "Europe"
- ],
- "copenhagenspandektes": [
-  "Denmark",
-  "Europe"
- ],
- "directdrivetech": [
-  "China",
-  "Asia"
- ],
- "edens": [
+ "autonomoussolutions": [
   "US",
   "North America"
+ ],
+ "brahmaai": [
+  "UK",
+  "Europe"
+ ],
+ "capitolis": [
+  "US",
+  "North America"
+ ],
+ "cellpointdigital": [
+  "UK",
+  "Europe"
  ],
  "eliseai": [
   "US",
   "North America"
  ],
- "firecrawl": [
-  "US",
-  "North America"
- ],
- "goai": [
-  "US",
-  "North America"
- ],
- "gravity": [
-  "",
-  "Other"
- ],
- "inbolt": [
-  "France",
+ "eniplenitude": [
+  "Italy",
   "Europe"
  ],
- "ipid": [
-  "",
-  "Other"
+ "finmid": [
+  "Germany",
+  "Europe"
+ ],
+ "fintechos": [
+  "UK",
+  "Europe"
+ ],
+ "generalintuition": [
+  "US",
+  "North America"
+ ],
+ "givestar": [
+  "UK",
+  "Europe"
+ ],
+ "gmicloud": [
+  "US",
+  "North America"
+ ],
+ "instinct": [
+  "US",
+  "North America"
+ ],
+ "island": [
+  "US",
+  "North America"
  ],
  "jeeves": [
   "US",
   "North America"
  ],
- "jpyc": [
-  "Japan",
-  "Asia"
- ],
- "landsec": [
+ "kahua": [
   "US",
   "North America"
  ],
- "londonsmetaview": [
-  "UK",
+ "kheops": [
+  "France",
   "Europe"
  ],
- "mal": [
-  "",
-  "Other"
- ],
- "metaview": [
-  "UK",
-  "Europe"
- ],
- "miamifintechjeeves": [
+ "micro1": [
   "US",
   "North America"
  ],
- "onar": [
-  "Finland",
+ "nationalbankofcanada": [
+  "Canada",
+  "North America"
+ ],
+ "nexbank": [
+  "US",
+  "North America"
+ ],
+ "noxtua": [
+  "Germany",
   "Europe"
  ],
- "outmarket": [
+ "numeral": [
+  "US",
+  "North America"
+ ],
+ "outerlimit": [
+  "UK",
+  "Europe"
+ ],
+ "palebluedotai": [
   "US",
   "North America"
  ],
@@ -117,40 +99,56 @@
   "Denmark",
   "Europe"
  ],
- "parkwaybank": [
+ "quartermasterai": [
   "US",
   "North America"
  ],
- "rayon": [
+ "simaai": [
+  "US",
+  "North America"
+ ],
+ "snorkelai": [
+  "US",
+  "North America"
+ ],
+ "spiko": [
   "France",
   "Europe"
  ],
- "reco": [
-  "US",
-  "North America"
- ],
- "redotpay": [
-  "China",
-  "Asia"
- ],
- "restate": [
-  "Germany",
+ "sprive": [
+  "UK",
   "Europe"
  ],
- "sanfranciscosvolantis": [
+ "strategy": [
   "US",
   "North America"
  ],
  "supabase": [
-  "Singapore",
-  "Other"
+  "US",
+  "North America"
+ ],
+ "teamshares": [
+  "US",
+  "North America"
  ],
  "tundr": [
   "Italy",
   "Europe"
  ],
- "volantis": [
+ "underdogsgroup": [
+  "Italy",
+  "Europe"
+ ],
+ "valon": [
   "US",
   "North America"
+ ],
+ "vinci": [
+  "US",
+  "North America"
+ ],
+ "wealthcome": [
+  "France",
+  "Europe"
  ]
 }

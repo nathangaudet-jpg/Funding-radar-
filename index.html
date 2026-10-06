@@ -135,9 +135,9 @@ function render(){
   if(S.view==="week"){
     $("title").textContent="Week "+wk(S.week)+", "+day(S.week)+" – "+day(shift(S.week,6),{day:"numeric",month:"short",year:"numeric"});
     const sw=S.sweeps.find(s=>s.week===S.week);
-    $("sub").textContent=sw?"Swept "+new Date(sw.ran_at).toLocaleString("en-GB",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})+", covering the 7 days before. "+sw.feeds_checked+" feeds checked"+(sw.feed_errors&&sw.feed_errors.length?", "+sw.feed_errors.length+" could not be read.":"."):(S.week===now?"This week's sweep hasn't run yet. It runs automatically on Monday morning.":"No sweep recorded for this week.");
+    $("sub").textContent=sw?"Rounds announced this week, from Crunchbase. Updated "+new Date(sw.ran_at).toLocaleString("en-GB",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})+".":(S.week===now?"This week hasn't been updated yet. Updates happen on Mondays.":"No update recorded for this week.");
     $("nav").hidden=false;$("next").disabled=S.week>=now;
-  }else{$("title").textContent="All tracked rounds";$("sub").textContent=S.rounds.length+" rounds since the first sweep.";$("nav").hidden=true}
+  }else{$("title").textContent="All tracked rounds";$("sub").textContent=S.rounds.length+" rounds from Crunchbase.";$("nav").hidden=true}
   $("tab-week").setAttribute("aria-selected",S.view==="week");$("tab-all").setAttribute("aria-selected",S.view==="all");
   const scope=S.rounds.filter(r=>S.view!=="week"||r.week===S.week);
   const names=S.fields.length?S.fields:[...new Set(S.rounds.map(r=>r.field))];
@@ -146,7 +146,7 @@ function render(){
   let body;
   if(!S.ready)body=[h("div",{class:"empty"},h("p",null,"Loading…"))];
   else if(S.error)body=[h("div",{class:"empty"},h("h2",null,"No data yet"),h("p",null,S.error))];
-  else if(!list.length)body=[h("div",{class:"empty"},h("h2",null,scope.length?"No rounds match these filters":"No rounds for this week"),h("p",null,scope.length?"Clear a filter or pick another field.":"Pick another week, or run the sweep from the Actions tab on GitHub."))];
+  else if(!list.length)body=[h("div",{class:"empty"},h("h2",null,scope.length?"No rounds match these filters":"No rounds for this week"),h("p",null,scope.length?"Clear a filter or pick another field.":"Pick another week."))];
   else body=list.map(rowEl);
   $("list").replaceChildren(...body);
 }
@@ -159,7 +159,7 @@ function rowEl(r){
     h("div",{class:"amount"},money(r),h("small",null,[r.stage,r.date?day(r.date):""].filter(Boolean).join(", "))),
     h("p",{class:"what"},r.headline),
     h("div",{class:"foot"},
-      r.source_url?h("span",null,h("a",{href:r.source_url,target:"_blank",rel:"noopener noreferrer"},r.source_name||"Source")," ",h("span",{class:r.first_party?"ok":"warn"},r.first_party?"first-party":"secondary")):null,
+      r.source_url?h("span",null,h("a",{href:r.source_url,target:"_blank",rel:"noopener noreferrer"},r.source_name||"Source")," ",(r.source_name==="Crunchbase"?null:h("span",{class:r.first_party?"ok":"warn"},r.first_party?"first-party":"secondary"))):null,
       r.amount_label?h("span",null,"Reported as ",r.amount_label):null,
       h("span",{class:"status"},sel)));
 }
@@ -180,7 +180,7 @@ render();
 const get=p=>fetch(p+"?v="+Date.now()).then(r=>{if(!r.ok)throw new Error(p);return r.json()});
 Promise.allSettled([get("data/rounds.json"),get("data/sweeps.json"),get("config.json")]).then(([a,b,c])=>{
   S.ready=true;
-  if(a.status==="fulfilled")S.rounds=a.value;else S.error="The first sweep hasn't run yet. Open the Actions tab on GitHub and run \"Monday funding sweep\".";
+  if(a.status==="fulfilled")S.rounds=a.value;else S.error="No rounds have been added yet.";
   if(b.status==="fulfilled")S.sweeps=b.value;
   if(c.status==="fulfilled"){S.fields=(c.value.fields||[]).map(f=>f.name);renderAreas(c.value)}
   const OLD={US:"North America",China:"Asia"};S.rounds.forEach(r=>{if(OLD[r.region])r.region=OLD[r.region]});
