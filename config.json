@@ -1,300 +1,334 @@
 {
-  "scouting_areas": [
-    {
-      "region": "Europe",
-      "countries": "all",
-      "threshold_musd": 10
-    },
-    {
-      "region": "North America",
-      "countries": [
-        "US",
-        "Canada"
-      ],
-      "threshold_musd": 100
-    },
-    {
-      "region": "Asia",
-      "countries": [
-        "Japan",
-        "China"
-      ],
-      "threshold_musd": 100
-    }
-  ],
-  "unknown_region": {
-    "keep": true,
-    "threshold_musd": 10
+ "scouting_areas": [
+  {
+   "region": "Europe",
+   "countries": "all",
+   "threshold_musd": 10
   },
-  "window_days": 7,
-  "eur_to_usd": 1.1,
-  "gbp_to_usd": 1.3,
-  "fields": [
-    {
-      "name": "Customer service",
-      "keywords": [
-        "customer service",
-        "customer support",
-        "contact center",
-        "call center",
-        "customer experience",
-        "support automation"
-      ]
-    },
-    {
-      "name": "Banking & payments",
-      "keywords": [
-        "payments",
-        "neobank",
-        "digital bank",
-        "banking",
-        "stablecoin",
-        "digital euro",
-        "fintech",
-        "wallet",
-        "checkout"
-      ]
-    },
-    {
-      "name": "Synthetic audiences",
-      "keywords": [
-        "synthetic audience",
-        "synthetic respondents",
-        "virtual panel",
-        "AI market research",
-        "consumer research",
-        "simulated consumers",
-        "AI-moderated interviews"
-      ]
-    },
-    {
-      "name": "Retail",
-      "keywords": [
-        "retail",
-        "retailer",
-        "ecommerce",
-        "e-commerce",
-        "shopping assistant",
-        "commerce",
-        "grocery"
-      ]
-    },
-    {
-      "name": "Mobility",
-      "keywords": [
-        "mobility",
-        "autonomous vehicle",
-        "robotaxi",
-        "self-driving",
-        "electric vehicle",
-        "EV charging",
-        "micromobility"
-      ]
-    },
-    {
-      "name": "LLMs",
-      "keywords": [
-        "large language model",
-        "LLM",
-        "foundation model",
-        "AI lab",
-        "frontier model",
-        "open-source model"
-      ]
-    },
-    {
-      "name": "Physical AI & supply chain",
-      "keywords": [
-        "warehouse",
-        "robotics",
-        "supply chain",
-        "logistics",
-        "humanoid",
-        "physical AI",
-        "autonomous truck"
-      ]
-    },
-    {
-      "name": "AI agents",
-      "keywords": [
-        "AI agent",
-        "AI agents",
-        "agentic",
-        "autonomous agents",
-        "agent platform",
-        "AI workforce"
-      ]
-    },
-    {
-      "name": "Development",
-      "keywords": [
-        "developer tools",
-        "coding assistant",
-        "AI coding",
-        "software development",
-        "devtools",
-        "code generation"
-      ]
-    },
-    {
-      "name": "Digital marketing",
-      "keywords": [
-        "marketing",
-        "adtech",
-        "advertising",
-        "martech",
-        "retail media",
-        "influencer marketing",
-        "SEO"
-      ]
-    },
-    {
-      "name": "Legal tech",
-      "keywords": [
-        "legal tech",
-        "legaltech",
-        "legal AI",
-        "law firm",
-        "contract management",
-        "e-discovery"
-      ]
-    },
-    {
-      "name": "New workspaces",
-      "keywords": [
-        "workspace",
-        "productivity software",
-        "work OS",
-        "enterprise search",
-        "knowledge management",
-        "collaboration software",
-        "operating system"
-      ]
-    }
-  ],
-  "big_actors": [
-    "Amazon",
-    "Walmart",
-    "Google",
-    "Alphabet",
-    "Microsoft",
-    "Apple",
-    "Meta",
-    "Salesforce",
-    "Zendesk",
-    "Oracle",
-    "SAP",
-    "Shopify",
-    "Visa",
-    "Mastercard",
-    "PayPal",
-    "Stripe",
-    "Adyen",
-    "Kantar",
-    "Ipsos",
-    "Nielsen",
-    "Qualtrics",
-    "NielsenIQ",
-    "Lidl",
-    "Schwarz",
-    "Carrefour",
-    "Ahold",
-    "Tesco",
-    "Target",
-    "Nvidia",
-    "OpenAI",
-    "Anthropic",
-    "Samsung",
-    "Oura",
-    "Garmin",
-    "ECB",
-    "Klarna",
-    "Alibaba",
-    "JD.com",
-    "Tencent",
-    "Tesla",
-    "Uber",
-    "Waymo",
-    "BMW",
-    "Volkswagen",
-    "Mercedes-Benz",
-    "Mistral",
-    "Cohere",
-    "xAI",
-    "Atlassian",
-    "Notion",
-    "Slack",
-    "Adobe",
-    "HubSpot",
-    "WPP",
-    "Publicis",
-    "Thomson Reuters",
-    "LexisNexis",
-    "WeWork",
-    "IWG",
-    "GitHub",
-    "JPMorgan",
-    "BNP Paribas",
-    "Deutsche Bank",
-    "Revolut",
-    "IBM"
-  ],
-  "extra_feeds": [
-    {
-      "name": "TechCrunch fundraising",
-      "url": "https://techcrunch.com/category/fundraising/feed/"
-    }
-  ],
-  "jpy_to_usd": 0.0067,
-  "cny_to_usd": 0.14,
-  "company_locations": {
-    "Amazon": "US",
-    "Walmart": "US",
-    "Google": "US",
-    "Alphabet": "US",
-    "Microsoft": "US",
-    "Apple": "US",
-    "Meta": "US",
-    "Salesforce": "US",
-    "Zendesk": "US",
-    "Oracle": "US",
-    "SAP": "Germany",
-    "Shopify": "Canada",
-    "Visa": "US",
-    "Mastercard": "US",
-    "PayPal": "US",
-    "Stripe": "US",
-    "Adyen": "Netherlands",
-    "Kantar": "UK",
-    "Ipsos": "France",
-    "Nielsen": "US",
-    "Qualtrics": "US",
-    "NielsenIQ": "US",
-    "Lidl": "Germany",
-    "Schwarz": "Germany",
-    "Carrefour": "France",
-    "Ahold": "Netherlands",
-    "Tesco": "UK",
-    "Target": "US",
-    "Nvidia": "US",
-    "OpenAI": "US",
-    "Anthropic": "US",
-    "Samsung": "South Korea",
-    "Oura": "Finland",
-    "Garmin": "US",
-    "ECB": "Germany",
-    "Klarna": "Sweden",
-    "Alibaba": "China",
-    "JD.com": "China",
-    "Tencent": "China",
-    "Uber": "US",
-    "Tesla": "US",
-    "Waymo": "US",
-    "Thomson Reuters": "Canada",
-    "LexisNexis": "US",
-    "Atlassian": "US",
-    "HubSpot": "US",
-    "Adobe": "US",
-    "IBM": "US"
+  {
+   "region": "North America",
+   "countries": [
+    "US",
+    "Canada"
+   ],
+   "threshold_musd": 100
+  },
+  {
+   "region": "Asia",
+   "countries": [
+    "Japan",
+    "China"
+   ],
+   "threshold_musd": 100
   }
+ ],
+ "unknown_region": {
+  "keep": true,
+  "threshold_musd": 10
+ },
+ "window_days": 7,
+ "eur_to_usd": 1.1,
+ "gbp_to_usd": 1.3,
+ "fields": [
+  {
+   "name": "Customer service",
+   "keywords": [
+    "customer service",
+    "customer support",
+    "contact center",
+    "call center",
+    "customer experience",
+    "support automation"
+   ]
+  },
+  {
+   "name": "Banking & payments",
+   "keywords": [
+    "payments",
+    "neobank",
+    "digital bank",
+    "banking",
+    "stablecoin",
+    "digital euro",
+    "fintech",
+    "wallet",
+    "checkout"
+   ]
+  },
+  {
+   "name": "Synthetic audiences",
+   "keywords": [
+    "synthetic audience",
+    "synthetic respondents",
+    "virtual panel",
+    "AI market research",
+    "consumer research",
+    "simulated consumers",
+    "AI-moderated interviews"
+   ]
+  },
+  {
+   "name": "Retail",
+   "keywords": [
+    "retail",
+    "retailer",
+    "ecommerce",
+    "e-commerce",
+    "shopping assistant",
+    "commerce",
+    "grocery"
+   ]
+  },
+  {
+   "name": "Mobility",
+   "keywords": [
+    "mobility",
+    "autonomous vehicle",
+    "robotaxi",
+    "self-driving",
+    "electric vehicle",
+    "EV charging",
+    "micromobility"
+   ]
+  },
+  {
+   "name": "LLMs",
+   "keywords": [
+    "large language model",
+    "LLM",
+    "foundation model",
+    "AI lab",
+    "frontier model",
+    "open-source model"
+   ]
+  },
+  {
+   "name": "Physical AI & supply chain",
+   "keywords": [
+    "warehouse",
+    "robotics",
+    "supply chain",
+    "logistics",
+    "humanoid",
+    "physical AI",
+    "autonomous truck"
+   ]
+  },
+  {
+   "name": "AI agents",
+   "keywords": [
+    "AI agent",
+    "AI agents",
+    "agentic",
+    "autonomous agents",
+    "agent platform",
+    "AI workforce"
+   ]
+  },
+  {
+   "name": "Development",
+   "keywords": [
+    "developer tools",
+    "coding assistant",
+    "AI coding",
+    "software development",
+    "devtools",
+    "code generation"
+   ]
+  },
+  {
+   "name": "Digital marketing",
+   "keywords": [
+    "marketing",
+    "adtech",
+    "advertising",
+    "martech",
+    "retail media",
+    "influencer marketing",
+    "SEO"
+   ]
+  },
+  {
+   "name": "Legal tech",
+   "keywords": [
+    "legal tech",
+    "legaltech",
+    "legal AI",
+    "law firm",
+    "contract management",
+    "e-discovery"
+   ]
+  },
+  {
+   "name": "New workspaces",
+   "keywords": [
+    "workspace",
+    "productivity software",
+    "work OS",
+    "enterprise search",
+    "knowledge management",
+    "collaboration software",
+    "operating system"
+   ]
+  },
+  {
+   "name": "Insurance",
+   "keywords": [
+    "insurance",
+    "insurtech",
+    "insurer",
+    "reinsurance",
+    "underwriting",
+    "claims"
+   ]
+  },
+  {
+   "name": "Cloud",
+   "keywords": [
+    "cloud",
+    "cloud infrastructure",
+    "data center",
+    "GPU cloud",
+    "IaaS",
+    "hosting",
+    "CDN"
+   ]
+  },
+  {
+   "name": "Sovereignty",
+   "keywords": [
+    "sovereign",
+    "sovereignty",
+    "sovereign cloud",
+    "sovereign AI",
+    "digital sovereignty",
+    "data residency"
+   ]
+  }
+ ],
+ "big_actors": [
+  "Amazon",
+  "Walmart",
+  "Google",
+  "Alphabet",
+  "Microsoft",
+  "Apple",
+  "Meta",
+  "Salesforce",
+  "Zendesk",
+  "Oracle",
+  "SAP",
+  "Shopify",
+  "Visa",
+  "Mastercard",
+  "PayPal",
+  "Stripe",
+  "Adyen",
+  "Kantar",
+  "Ipsos",
+  "Nielsen",
+  "Qualtrics",
+  "NielsenIQ",
+  "Lidl",
+  "Schwarz",
+  "Carrefour",
+  "Ahold",
+  "Tesco",
+  "Target",
+  "Nvidia",
+  "OpenAI",
+  "Anthropic",
+  "Samsung",
+  "Oura",
+  "Garmin",
+  "ECB",
+  "Klarna",
+  "Alibaba",
+  "JD.com",
+  "Tencent",
+  "Tesla",
+  "Uber",
+  "Waymo",
+  "BMW",
+  "Volkswagen",
+  "Mercedes-Benz",
+  "Mistral",
+  "Cohere",
+  "xAI",
+  "Atlassian",
+  "Notion",
+  "Slack",
+  "Adobe",
+  "HubSpot",
+  "WPP",
+  "Publicis",
+  "Thomson Reuters",
+  "LexisNexis",
+  "WeWork",
+  "IWG",
+  "GitHub",
+  "JPMorgan",
+  "BNP Paribas",
+  "Deutsche Bank",
+  "Revolut",
+  "IBM"
+ ],
+ "extra_feeds": [
+  {
+   "name": "TechCrunch fundraising",
+   "url": "https://techcrunch.com/category/fundraising/feed/"
+  }
+ ],
+ "jpy_to_usd": 0.0067,
+ "cny_to_usd": 0.14,
+ "company_locations": {
+  "Amazon": "US",
+  "Walmart": "US",
+  "Google": "US",
+  "Alphabet": "US",
+  "Microsoft": "US",
+  "Apple": "US",
+  "Meta": "US",
+  "Salesforce": "US",
+  "Zendesk": "US",
+  "Oracle": "US",
+  "SAP": "Germany",
+  "Shopify": "Canada",
+  "Visa": "US",
+  "Mastercard": "US",
+  "PayPal": "US",
+  "Stripe": "US",
+  "Adyen": "Netherlands",
+  "Kantar": "UK",
+  "Ipsos": "France",
+  "Nielsen": "US",
+  "Qualtrics": "US",
+  "NielsenIQ": "US",
+  "Lidl": "Germany",
+  "Schwarz": "Germany",
+  "Carrefour": "France",
+  "Ahold": "Netherlands",
+  "Tesco": "UK",
+  "Target": "US",
+  "Nvidia": "US",
+  "OpenAI": "US",
+  "Anthropic": "US",
+  "Samsung": "South Korea",
+  "Oura": "Finland",
+  "Garmin": "US",
+  "ECB": "Germany",
+  "Klarna": "Sweden",
+  "Alibaba": "China",
+  "JD.com": "China",
+  "Tencent": "China",
+  "Uber": "US",
+  "Tesla": "US",
+  "Waymo": "US",
+  "Thomson Reuters": "Canada",
+  "LexisNexis": "US",
+  "Atlassian": "US",
+  "HubSpot": "US",
+  "Adobe": "US",
+  "IBM": "US"
+ }
 }
